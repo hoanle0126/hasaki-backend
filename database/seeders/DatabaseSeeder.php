@@ -2,14 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Categories;
-use App\Models\FlashDeal;
-use App\Models\Type;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,9 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $path = database_path('sql/hasaki_clone.sql');
-        $sql = File::get($path);
-        DB::unprepared($sql);
-        $this->command->info('Đã seed dữ liệu từ file my_data.sql!');
+        $this->call([
+            SqlFileSeeder::class,
+            // Bạn có thể gọi các seeder khác ở đây nếu có
+            // Ví dụ: UserSeeder::class,
+        ]);
     }
 }
