@@ -13,7 +13,6 @@ class SqlFileSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Danh sách file theo thứ tự
         $files = [
             'categories.sql',
             'brands.sql',
@@ -24,14 +23,22 @@ class SqlFileSeeder extends Seeder
             'hot_deals.sql',
         ];
 
-        // 2. SỬA LỖI ĐƯỜNG DẪN TẠI ĐÂY
-        // Thư mục sql/ nằm trực tiếp trong database/
         $path = database_path('sql/');
+        
+        // Lấy tên driver database hiện tại (vd: 'mysql', 'sqlite', 'pgsql')
+        $driver = DB::connection()->getDriverName();
 
-        // 3. Tắt kiểm tra khóa ngoại
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // 2. Tắt kiểm tra khóa ngoại (TÙY THEO DRIVER)
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        } elseif ($driver === 'sqlite') {
+            // Dùng cú pháp của SQLite
+            DB::statement('PRAGMA foreign_keys = OFF;');
+        } elseif ($driver === 'pgsql') {
+            DB::statement("SET session_replication_role = 'replica';");
+        }
 
-        // 4. Lặp qua từng file và thực thi từng dòng
+        // 3. Lặp qua từng file và thực thi
         foreach ($files as $file) {
             $this->command->info("Seeding file: $file");
             $filePath = $path . $file;
@@ -41,45 +48,42 @@ class SqlFileSeeder extends Seeder
                 continue;
             }
 
-            // Mở file để đọc
             $handle = fopen($filePath, "r");
             if ($handle) {
-                $statement = ''; // Biến đệm lưu trữ câu lệnh SQL
+                $statement = ''; 
 
-                // Đọc từng dòng của file
                 while (($line = fgets($handle)) !== false) {
                     $trimmedLine = trim($line);
 
-                    // Bỏ qua các dòng trống hoặc là comment SQL
                     if ($trimmedLine == '' || strpos($trimmedLine, '--') === 0 || strpos($trimmedLine, '#') === 0) {
                         continue;
                     }
 
-                    // Thêm dòng hiện tại vào biến đệm
                     $statement .= $line;
 
-                    // Nếu dòng này kết thúc bằng dấu chấm phẩy (;)
                     if (str_ends_with($trimmedLine, ';')) {
                         try {
-                            // Thực thi câu lệnh đã gom
                             DB::unprepared($statement);
                         } catch (\Illuminate\Database\QueryException $e) {
                             $this->command->error("Error in $file: " . $e->getMessage());
                         }
-                        
-                        // Reset biến đệm để bắt đầu câu lệnh mới
                         $statement = '';
                     }
                 }
-
-                // Đóng file
                 fclose($handle);
             } else {
                 $this->command->error("Could not open file: $file");
             }
         }
 
-        // 5. Bật lại kiểm tra khóa ngoại
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // 4. Bật lại kiểm tra khóa ngoại (TÙY THEO DRIVER)
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } elseif ($driver === 'sqlite') {
+            // Dùng cú pháp của SQLite
+            DB::statement('PRAGMA foreign_keys = ON;');
+        } elseif ($driver === 'pgsql') {
+            DB::statement("SET session_replication_role = 'origin';");
+        }
     }
 }
