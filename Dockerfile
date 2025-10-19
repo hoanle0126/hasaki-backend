@@ -41,10 +41,14 @@ COPY apache.conf /etc/apache2/sites-available/000-default.conf
 # Cấp quyền
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# ----- THAY THẾ TẠI ĐÂY -----
-# Xóa các dòng "COPY start.sh", "RUN chmod" và "CMD" cũ
-# Thay bằng 1 dòng CMD duy nhất:
-CMD /bin/sh -c "php artisan migrate:fresh --force && \
+# LỆNH KHỞI ĐỘNG (SỬA LỖI CỔNG KÉP CỦA RENDER)
+# Sửa cổng trong file ports.conf VÀ file vhost 000-default.conf
+# CMD /bin/sh -c "sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf && sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/g' /etc/apache2/sites-available/000-default.conf && apache2-foreground"
+
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# LỆNH CMD DUY NHẤT (ĐÃ XUỐNG DÒNG CHO DỄ NHÌN)
+CMD /bin/sh -c "php artisan migrate --force && \
     php -d memory_limit=-1 artisan db:seed --force && \
     sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf && \
     sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/g' /etc/apache2/sites-available/000-default.conf && \
