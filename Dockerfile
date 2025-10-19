@@ -38,6 +38,8 @@ RUN a2enmod rewrite
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 # ---------------------------------------------
 
+EXPOSE 8000
+
 # Cấp quyền
 RUN chown -R www-data:www-data storage bootstrap/cache
 # LỆNH KHỞI ĐỘNG CUỐI CÙNG TRONG DOCKERFILE
