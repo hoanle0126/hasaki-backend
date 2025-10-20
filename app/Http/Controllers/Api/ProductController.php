@@ -38,21 +38,8 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // $product = $request->validated();
-        $category = Categories::where('name', $request['category'])->first();
-        $brand = Brand::where('name', $request['brand'])->first();
-        $existing = Product::where('name', $request['name'])->exists();
-        // $product['categories_id'] = $category->id;
-        // $product['brand_id'] = $brand->id;
-        // unset($product['category'], $product['brand']);
-        // Product::create($product);
-        if ($category && $brand && !$existing) {
-            return [
-                "category" => $category,
-                "brand" => $brand
-            ];
-        }
-        return $category['id'];
+        Product::create($request->all());
+        return $this->index();
     }
 
     /**
