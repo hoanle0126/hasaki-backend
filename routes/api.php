@@ -43,14 +43,20 @@ Route::post("/add-brands", function (Request $request) {
     }
     return HotDeal::all();
 });
-Route::get("/add-products", function (Request $request) {
-    $products = Product::all();
+Route::get("/add-products", function () {
+    // Xử lý từng đợt 100 sản phẩm để không bị hết RAM
+    Product::chunk(100, function ($products) {
+        foreach ($products as $product) {
+            // Kiểm tra xem images có phải mảng và có dữ liệu không
+            if (is_array($product->images) && count($product->images) > 0) {
+                $product->update([
+                    "thumbnail" => $product->images[0]
+                ]);
+            }
+        }
+    });
 
-    foreach ($products as $product) {
-        $product->update([
-            "thumbnail" => $product->images[0] ?? null
-        ]);
-    }
+    return "Đã cập nhật thumbnail thành công!";
 });
 
 Route::get('/debug-config', function () {
