@@ -39,9 +39,23 @@ class Product extends Model
                 $product->remain = $product->quantity ?? 0;
             }
             $product->url = Str::slug($product->name);
+            $currentImages = $product->images ?? []; // Đảm bảo là mảng
+
+            // Chỉ thêm thumbnail vào mảng nếu nó chưa tồn tại trong mảng đó
+            if ($product->thumbnail && !in_array($product->thumbnail, $currentImages)) {
+                array_unshift($currentImages, $product->thumbnail); // Đưa lên đầu mảng
+            }
+
+            $product->images = $currentImages;
+        });
+        static::updating(function ($product) {
+            $product->url = Str::slug($product->name);
         });
     }
-
+    public function getRouteKeyName()
+    {
+        return 'url'; // hoặc 'code', 'sku', 'name' tùy bạn
+    }
     public function categories()
     {
         return $this->belongsTo(Categories::class);

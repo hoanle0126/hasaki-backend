@@ -12,6 +12,10 @@ class DiscountCode extends Model
         "code",
         "applyAll"
     ];
+    public function getRouteKeyName()
+    {
+        return 'code';
+    }
 
     public function Products()
     {

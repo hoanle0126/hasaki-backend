@@ -15,9 +15,23 @@ class Brand extends Model
         "url"
     ];
 
+    public static function booted()
+    {
+        static::creating(function ($brand) {
+            $brand->url = \Str::slug($brand->name);
+        });
+        static::updating(function ($brand) {
+            $brand->url = \Str::slug($brand->name);
+        });
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+    public function getRouteKeyName()
+    {
+        return 'url'; // hoặc 'code', 'sku', 'name' tùy bạn
     }
 
     public function DiscountCode()

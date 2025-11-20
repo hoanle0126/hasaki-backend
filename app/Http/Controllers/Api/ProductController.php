@@ -18,23 +18,14 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // $paginate = request()->query("paginate");
-        // $search = request()->query("search");
-        // $excludingParam = request()->query("excluding");
-        // $excluding = $excludingParam ? explode(",", $excludingParam) : [];
-        // return ProductResource::collection(Product::where("name", "like", "%{$search}%")
-        //     ->whereNotIn("id", $excluding)
-        //     ->orderBy("created_at", "desc")
-        //     ->paginate($paginate));
-
-        $products = Product::all();
-
-        foreach ($products as $product) {
-            $product->update([
-                "thumbnail"=>$product->images[0] ?? null
-            ]);
-        }
-
+        $paginate = request()->query("paginate");
+        $search = request()->query("search");
+        $excludingParam = request()->query("excluding");
+        $excluding = $excludingParam ? explode(",", $excludingParam) : [];
+        return ProductResource::collection(Product::where("name", "like", "%{$search}%")
+            ->whereNotIn("id", $excluding)
+            ->orderBy("created_at", "desc")
+            ->paginate($paginate));
     }
 
     /**

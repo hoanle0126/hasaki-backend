@@ -23,7 +23,9 @@ class BrandResource extends JsonResource
             "thumbnail" => $this->thumbnail,
             "banner" => $this->banner,
             "logo" => $this->logo,
-            "products_count" => $this->products->count()
+            "products_count" => $this->products->count(),
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
         ];
     }
 }
