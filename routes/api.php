@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\NewMessage;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Resources\BrandResource;
 use App\Http\Resources\CategoriesResource;
 use App\Http\Resources\CityResource;
@@ -42,50 +44,17 @@ Route::post("/add-brands", function (Request $request) {
     return HotDeal::all();
 });
 Route::post("/add-products", function (Request $request) {
-
-    foreach ($request->all() as $product) {
-        $categories_id = Categories::where("name", $product['category'])->first();
-        $brand_id = Brand::where("name", $product['brand'])->first();
-        $existing = Product::where('name', $product['name'])->exists();
-        if ($categories_id && $brand_id && !$existing) {
-            Product::create([
-                "name" => $product['name'],
-                "english_name" => $product['english_name'] ? $product['english_name'] : "",
-                "categories_id" => $categories_id->id,
-                "brand_id" => $brand_id->id,
-                "price" => $product['price'] ? $product['price'] : 100000,
-                "sales" => $product['sales'],
-                "images" => $product['images'],
-                "quantity" => $product['quantity'],
-                "description" => $product['description'],
-                "parameters" => $product['parameters'],
-                "ingredients" => $product['ingredients'],
-                "guide" => $product['guide']
-            ]);
-        }
-    }
-    $products = collect($request->all());
-
-
-    return $products->count();
-});
-Route::post("/add-products2", function (Request $request) {
     $products = Product::all();
+
     foreach ($products as $product) {
-        $images = collect($product['images']);
-
-        if ($images->isNotEmpty()) {
-            $product->update([
-                "thumbnail" => $images[0],
-            ]);
-        }
+        $product->update([
+            "thumbnail" => $product->images[0] ?? null
+        ]);
     }
-
-
-    return $products->count();
 });
 
 Route::apiResource("/products", ProductController::class);
+Route::post("/payments", [PaymentController::class, 'processPayment']);
 Route::apiResource("/addresses", AddressController::class)->middleware('auth:sanctum');
 Route::apiResource("/carts", CartController::class)->middleware('auth:sanctum');
 Route::apiResource("/orders", OrderController::class)->middleware('auth:sanctum');
@@ -116,4 +85,19 @@ Route::get('/user', function () {
 
 Route::get("/list_cities", function () {
     return CityResource::collection(City::all());
+});
+
+Route::post('/chat/send', function (Request $request) {
+    $request->validate([
+        'user' => 'required|string',
+        'message' => 'required|string',
+    ]);
+
+    // Kích hoạt Event. Laravel sẽ đẩy Event này vào Redis Queue.
+    broadcast(new NewMessage($request->user, $request->message));
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Message broadcasted successfully.'
+    ]);
 });
