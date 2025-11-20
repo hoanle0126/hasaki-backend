@@ -54,7 +54,7 @@ class DiscountCodeController extends Controller
      */
     public function show(DiscountCode $discountCode)
     {
-        //
+        return new DiscountCodeResource($discountCode);
     }
 
     /**

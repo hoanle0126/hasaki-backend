@@ -17,9 +17,6 @@ class CategoriesController extends Controller
     public function index()
     {
         $categories = Categories::where("name", "Sức Khỏe - Làm Đẹp")->first();
-        // return CategoriesResource::collection(Categories::whereNull("parent_id")
-        //     ->with("parent")
-        //     ->get());
         return CategoriesResource::collection(Categories::where("parent_id",$categories->id)->get());
     }
 
@@ -43,19 +40,19 @@ class CategoriesController extends Controller
             "parent_id" => $parentId
         ]);
 
-        // Đệ quy thêm children nếu có
-        $children = $request['children'] ?? [];
-        if (!empty($children)) {
-            foreach ($children as $child) {
-                $childRequest = new Request($child); // Tạo request mới cho child
-                $this->store($childRequest, $category->id);
-            }
-        }
+        // // Đệ quy thêm children nếu có
+        // $children = $request['children'] ?? [];
+        // if (!empty($children)) {
+        //     foreach ($children as $child) {
+        //         $childRequest = new Request($child); // Tạo request mới cho child
+        //         $this->store($childRequest, $category->id);
+        //     }
+        // }
 
-        // Chỉ trả về khi là cấp gốc
-        if ($parentId === null) {
-            return CategoryResource::collection(Categories::all());
-        }
+        // // Chỉ trả về khi là cấp gốc
+        // if ($parentId === null) {
+        //     return CategoryResource::collection(Categories::all());
+        // }
     }
 
     /**

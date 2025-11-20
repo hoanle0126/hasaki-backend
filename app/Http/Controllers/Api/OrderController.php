@@ -30,9 +30,14 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(OrderRequest $request)
+    public function store(Request $request)
     {
-        $orderRequest = $request->validated();
+        $orderRequest = [
+            "payments" => $request->payments,
+            "note" => $request->note,
+            "discount_code_id" => $request->discount_code_id,
+            "address_id" => $request->address_id
+        ];
         $orderRequest['user_id'] = Auth::id();
         $products = request()->products;
 

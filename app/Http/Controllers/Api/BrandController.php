@@ -46,9 +46,8 @@ class BrandController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($brand)
+    public function show(Brand $brand)
     {
-        $brand = Brand::where("url", $brand)->first();
         $products = $brand->products();
         $sort = request()->query("sort");
         $paginate = request()->query("limit");

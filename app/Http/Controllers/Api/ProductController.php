@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Categories;
 use App\Models\Product;
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -17,12 +18,23 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $paginate = request()->query("paginate");
-        $search = request()->query("search");
-        $excluding = explode(",", request()->query("excluding"));
-        return ProductResource::collection(Product::where("name", "like", "%{$search}%")
-            ->whereNotIn("id", $excluding)
-            ->paginate($paginate));
+        // $paginate = request()->query("paginate");
+        // $search = request()->query("search");
+        // $excludingParam = request()->query("excluding");
+        // $excluding = $excludingParam ? explode(",", $excludingParam) : [];
+        // return ProductResource::collection(Product::where("name", "like", "%{$search}%")
+        //     ->whereNotIn("id", $excluding)
+        //     ->orderBy("created_at", "desc")
+        //     ->paginate($paginate));
+
+        $products = Product::all();
+
+        foreach ($products as $product) {
+            $product->update([
+                "thumbnail"=>$product->images[0] ?? null
+            ]);
+        }
+
     }
 
     /**
@@ -38,17 +50,29 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        Product::create($request->all());
-        return $this->index();
+        try {
+            // Cố gắng tạo sản phẩm
+            Product::create($request->all());
+
+            // Nếu thành công, trả về index
+            return $this->index();
+
+        } catch (Exception $e) {
+            // Nếu có lỗi, trả về object lỗi (JSON)
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Đã xảy ra lỗi khi lưu sản phẩm.',
+                'error_detail' => $e->getMessage() // Lấy chi tiết lỗi
+            ], 500); // Mã lỗi 500 (Internal Server Error)
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($product_url)
+    public function show(Product $product)
     {
-        return new ProductResource(Product::where("url", $product_url)->first());
-        // return Product::where("url", $product_url)->first();
+        return new ProductResource($product);
     }
 
     /**
@@ -62,11 +86,9 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, $product_url)
+    public function update(Request $request, Product $product)
     {
-        $product = Product::where("url", $product_url)->first();
-        $validated = $request->validated();
-        $product->update($validated);
+        $product->update($request->all());
         return $this->index();
     }
 
