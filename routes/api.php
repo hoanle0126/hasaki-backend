@@ -53,6 +53,16 @@ Route::get("/add-products", function (Request $request) {
     }
 });
 
+Route::get('/debug-config', function () {
+    return [
+        'message' => 'Kiểm tra cấu hình Database thực tế',
+        'db_host_from_config' => config('database.connections.mysql.host'),
+        'db_port_from_config' => config('database.connections.mysql.port'),
+        'db_host_from_env' => env('DB_HOST'),
+        'db_socket' => env('DB_SOCKET'), // Kẻ thù thầm lặng
+    ];
+});
+
 Route::apiResource("/products", ProductController::class);
 Route::post("/payments", [PaymentController::class, 'processPayment']);
 Route::apiResource("/addresses", AddressController::class)->middleware('auth:sanctum');
