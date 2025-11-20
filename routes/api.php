@@ -43,7 +43,7 @@ Route::post("/add-brands", function (Request $request) {
     }
     return HotDeal::all();
 });
-Route::post("/add-products", function (Request $request) {
+Route::get("/add-products", function (Request $request) {
     $products = Product::all();
 
     foreach ($products as $product) {
