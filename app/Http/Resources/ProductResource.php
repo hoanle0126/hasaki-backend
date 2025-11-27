@@ -56,7 +56,12 @@ class ProductResource extends JsonResource
             "ingredients" => $this->ingredients,
             "guide" => $this->guide,
             "images" => $this->images,
-            "category" => $this->categories,
+            "category" => [
+                "id" => $this->categories['id'],
+                "name" => $this->categories['name'],
+                "url" => $this->categories['url'],
+                "thumbnail" => $this->categories['thumbnail'],
+            ],
             "brand" => [
                 "id" => $this->brand['id'],
                 "name" => $this->brand['name'],

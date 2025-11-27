@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\HotDealController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PaymentController;
@@ -70,6 +71,7 @@ Route::get('/debug-config', function () {
 });
 
 Route::apiResource("/products", ProductController::class);
+Route::apiResource("/users", UserController::class);
 Route::post("/payments", [PaymentController::class, 'processPayment']);
 Route::apiResource("/addresses", AddressController::class)->middleware('auth:sanctum');
 Route::apiResource("/carts", CartController::class)->middleware('auth:sanctum');
@@ -86,34 +88,9 @@ Route::get('/categories-children', function (Request $request) {
         });
     return CategoriesResource::collection($categories);
 });
-Route::post('/login', [AuthenticatedSessionController::class, 'store'])
-    ->middleware('guest')
-    ->name('login');
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->middleware('auth:sanctum')
-    ->name('logout');
-Route::get('/user', function () {
 
-    return new UserResource(request()->user());
-})
-    ->middleware('auth:sanctum')
-    ->name('user');
 
 Route::get("/list_cities", function () {
     return CityResource::collection(City::all());
 });
-
-Route::post('/chat/send', function (Request $request) {
-    $request->validate([
-        'user' => 'required|string',
-        'message' => 'required|string',
-    ]);
-
-    // Kích hoạt Event. Laravel sẽ đẩy Event này vào Redis Queue.
-    broadcast(new NewMessage($request->user, $request->message));
-
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Message broadcasted successfully.'
-    ]);
-});
+require __DIR__ . '/auth.php';

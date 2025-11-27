@@ -24,6 +24,8 @@ class User extends Authenticatable
         'email',
         "birth",
         'password',
+        "gender",
+        "email_verified_at"
     ];
 
     /**
@@ -34,6 +36,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        "email_verified_at"
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed'
     ];
 
     protected static function booted()
