@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\OrderRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Cart;
 use App\Models\Order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -32,6 +33,8 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        $cart = Cart::where('user_id', Auth::id())->first();
+
         $orderRequest = [
             "payments" => $request->payments,
             "note" => $request->note,
@@ -42,6 +45,7 @@ class OrderController extends Controller
         $products = request()->products;
 
         $order = Order::create($orderRequest);
+        $cart->delete();
 
         foreach ($products as $value) {
             $order->Products()->attach($value['id'], [

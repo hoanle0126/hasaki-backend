@@ -46,11 +46,11 @@ class User extends Authenticatable
 
     protected static function booted()
     {
-        static::created(function ($user) {
-            Cart::create([
-                "user_id" => $user->id
-            ]);
-        });
+        // static::created(function ($user) {
+        //     Cart::create([
+        //         "user_id" => $user->id
+        //     ]);
+        // });
     }
 
     /**
